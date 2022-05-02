@@ -1,8 +1,6 @@
 import * as BABYLON from "babylonjs";
 import { Vector3 } from "babylonjs";
 import "babylonjs-loaders";
-import "./cannon.js";
-// import './ammo.js'
 
 enum State {
   READY = 0,

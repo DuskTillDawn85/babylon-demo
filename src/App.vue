@@ -25,7 +25,7 @@ onMounted(() => {
 }
 .canvas-wrap {
   border: 1px solid #2c3e50;
-  height: 600px;
+  height: 800px;
 
   #renderCanvas {
     width: 100%;

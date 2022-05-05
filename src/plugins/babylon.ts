@@ -25,10 +25,18 @@ const createScene = async (
     await BABYLON.SceneLoader.ImportMeshAsync("", "src/assets/models/", "seagulf.glb", scene)
   ).meshes[0];
 
+  const avatar = (
+    await BABYLON.SceneLoader.ImportMeshAsync("", "src/assets/models/", "avatar.glb", scene)
+  ).meshes[0];
+
   // 调整角色大小、朝向和位置
-  seagulf.scaling.scaleInPlace(0.3);
-  seagulf.position = new BABYLON.Vector3(0, 152, 0);
+  seagulf.scaling.scaleInPlace(0.2);
+  seagulf.position = new BABYLON.Vector3(130, 100, -30);
   seagulf.rotation = new BABYLON.Vector3(0, 4.8, 0);
+
+  avatar.scaling.scaleInPlace(200);
+  avatar.position = new BABYLON.Vector3(120, 0, 70);
+  avatar.rotation = new BABYLON.Vector3(0, 4.8, 0);
 
   // 创建自由视角相机
   const camera = new BABYLON.ArcRotateCamera(

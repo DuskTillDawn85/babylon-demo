@@ -1,12 +1,5 @@
 import * as BABYLON from "babylonjs";
-import { Vector3 } from "babylonjs";
 import "babylonjs-loaders";
-
-enum State {
-  READY = 0,
-  PLAY = 1,
-  LOSE = 2,
-}
 
 const createScene = async (
   engine: BABYLON.Engine,
@@ -15,21 +8,27 @@ const createScene = async (
   const scene = new BABYLON.Scene(engine);
 
   // 激活物理引擎
-  const physicsPlugin = new BABYLON.CannonJSPlugin();
-  scene.enablePhysics();
+  // scene.enablePhysics();
+
+  // 天空盒子环境
+  const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 3000 }, scene);
+  const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+  skyboxMaterial.backFaceCulling = false;
+  skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("src/assets/textures/skybox", scene);
+  skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+  skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+  skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+  skybox.material = skyboxMaterial;
 
   // 加载角色模型
-  const seagulf = await BABYLON.SceneLoader.ImportMeshAsync(
-    "",
-    "src/assets/models/",
-    "seagulf.glb",
-    scene
-  );
+  const seagulf = (
+    await BABYLON.SceneLoader.ImportMeshAsync("", "src/assets/models/", "seagulf.glb", scene)
+  ).meshes[0];
 
   // 调整角色大小、朝向和位置
-  seagulf.meshes[0].scaling.scaleInPlace(0.3);
-  seagulf.meshes[0].position = new BABYLON.Vector3(0, 152, 0);
-  seagulf.meshes[0].rotation = new BABYLON.Vector3(0, 4.8, 0);
+  seagulf.scaling.scaleInPlace(0.3);
+  seagulf.position = new BABYLON.Vector3(0, 152, 0);
+  seagulf.rotation = new BABYLON.Vector3(0, 4.8, 0);
 
   // 创建自由视角相机
   const camera = new BABYLON.ArcRotateCamera(
@@ -50,13 +49,12 @@ const createScene = async (
   // 降低亮度
   light.intensity = 0.7;
 
-
-  // 创建地板砖
+  // 创建初始地板砖
   const faceColors = new Array(6);
 
   for (let i = 0; i < 6; i++) {
     if (i === 4) faceColors[i] = new BABYLON.Color4(0.13, 0.68, 1, 0.8);
-    else faceColors[i] = new BABYLON.Color4(1,1,1,1);
+    else faceColors[i] = new BABYLON.Color4(1, 1, 1, 1);
   }
   const tiledBox = BABYLON.MeshBuilder.CreateBox(
     "",
@@ -67,7 +65,37 @@ const createScene = async (
     },
     scene
   );
-  tiledBox.position = new BABYLON.Vector3(160,-50,0)
+  tiledBox.position = new BABYLON.Vector3(160, -50, 0);
+
+  // 注册事件
+  let duration: number;
+  scene.actionManager = new BABYLON.ActionManager(scene);
+  scene.actionManager.registerAction(
+    new BABYLON.ExecuteCodeAction(
+      {
+        trigger: BABYLON.ActionManager.OnKeyDownTrigger,
+        parameter: " ",
+      },
+      () => {
+        if (!duration) duration = new Date().getTime();
+      }
+    )
+  );
+  scene.actionManager.registerAction(
+    new BABYLON.ExecuteCodeAction(
+      {
+        trigger: BABYLON.ActionManager.OnKeyUpTrigger,
+        parameter: " ",
+      },
+      () => {
+        duration = new Date().getTime() - duration;
+        console.log("按下时长：", duration / 1000);
+        duration = 0;
+      }
+    )
+  );
+  // https://playground.babylonjs.com/#C21DGD#2
+  // scene.onPointerDown = (e,res)=> {}
 
   // 返回最终渲染场景
   return scene;
